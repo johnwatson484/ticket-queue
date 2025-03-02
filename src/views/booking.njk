@@ -3,8 +3,8 @@
 {% block content %}
   <h1>Book a ticket</h1>
 
-  <form action="/queue/join" method="post">
+  <form action="/booking" method="post">
     <input type="hidden" name="crumb" value="{{ crumb }}">
-    <button type="submit" class="btn btn-primary">Join the queue</button>
+    <button type="submit" class="btn btn-primary">Book ticket</button>
   </form>
 {% endblock %}
