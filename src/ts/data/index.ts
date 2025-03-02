@@ -36,41 +36,54 @@ async function deleteAllTickets () : Promise<void> {
   await collection.deleteMany({})
 }
 
-async function reserveTickets (numberToReserve: number) : Promise<Reservation> {
-  const bookingNumber: string = createBookingNumber()
-  const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
+async function reserveTickets (numberToReserve: number): Promise<Reservation> {
+  const session = client.startSession()
+  session.startTransaction()
 
-  const ticketsToReserve = await collection.find(
-    {
-      $or: [
-        { reservedDate: undefined },
-        { reservedDate: { $lt: reserveExpirationDate } }
-      ],
-      confirmedDate: undefined
+  try {
+    const bookingNumber: string = createBookingNumber()
+    const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
+
+    const ticketsToReserve = await collection.find(
+      {
+        $or: [
+          { reservedDate: undefined },
+          { reservedDate: { $lt: reserveExpirationDate } }
+        ],
+        confirmedDate: undefined
+      },
+      { session }
+    ).limit(numberToReserve).toArray()
+
+    if (ticketsToReserve.length < numberToReserve) {
+      throw new Error('Tickets not available')
     }
-  ).limit(numberToReserve).toArray()
 
-  if (ticketsToReserve.length < numberToReserve) {
-    throw new Error('Tickets not available')
+    const ticketIds = ticketsToReserve.map((ticket: { _id: any }) => ticket._id)
+    const reservedDate = new Date().toISOString()
+
+    await collection.updateMany(
+      { _id: { $in: ticketIds } },
+      { $set: { reservedDate, bookingNumber } },
+      { session, upsert: false }
+    )
+
+    const reservation: Reservation = {
+      bookingNumber,
+      tickets: numberToReserve,
+      reservedDate: new Date(),
+      expirationDate: new Date(Date.now() + RESERVATION_EXPIRATION)
+    }
+
+    await session.commitTransaction()
+    session.endSession()
+
+    return reservation
+  } catch (error) {
+    await session.abortTransaction()
+    session.endSession()
+    throw error
   }
-
-  const ticketIds = ticketsToReserve.map((ticket: { _id: any }) => ticket._id)
-  const reservedDate = new Date().toISOString()
-
-  await collection.updateMany(
-    { _id: { $in: ticketIds } },
-    { $set: { reservedDate, bookingNumber } },
-    { upsert: false, multi: true }
-  )
-
-  const reservation: Reservation = {
-    bookingNumber,
-    tickets: numberToReserve,
-    reservedDate: new Date(),
-    expirationDate: new Date(Date.now() + RESERVATION_EXPIRATION)
-  }
-
-  return reservation
 }
 
 async function getUnpaidTicketsByBookingNumber (bookingNumber: string) : Promise<Ticket[]> {
@@ -106,21 +119,36 @@ type Reservation = {
   expirationDate: Date
 }
 
-async function payForTickets (bookingNumber: string, tickets: number) : Promise<void> {
-  const unpaidTickets: Ticket[] = await getUnpaidTicketsByBookingNumber(bookingNumber)
+async function payForTickets (bookingNumber: string, tickets: number): Promise<void> {
+  const session = client.startSession()
+  session.startTransaction()
 
-  if (unpaidTickets.length < tickets) {
-    throw new Error('Tickets not available')
+  try {
+    const unpaidTickets: Ticket[] = await collection.find(
+      { reservedDate: { $ne: undefined }, confirmedDate: undefined, bookingNumber },
+      { session }
+    ).toArray()
+
+    if (unpaidTickets.length < tickets) {
+      throw new Error('Tickets not available')
+    }
+
+    const ticketIds = unpaidTickets.map((ticket: { _id: any }) => ticket._id)
+    const confirmedDate = new Date().toISOString()
+
+    await collection.updateMany(
+      { _id: { $in: ticketIds } },
+      { $set: { confirmedDate } },
+      { session, upsert: false }
+    )
+
+    await session.commitTransaction()
+  } catch (error) {
+    await session.abortTransaction()
+    throw error
+  } finally {
+    session.endSession()
   }
-
-  const ticketIds = unpaidTickets.map((ticket: { _id: any }) => ticket._id)
-  const confirmedDate = new Date().toISOString()
-
-  await collection.updateMany(
-    { _id: { $in: ticketIds } },
-    { $set: { confirmedDate } },
-    { upsert: false, multi: true }
-  )
 }
 
 export {
