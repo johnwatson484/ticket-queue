@@ -1,3 +1,0 @@
-{{- include "helm-library.ingress" (list . "hapi-template-ts.ingress") -}}
-{{- define "hapi-template-ts.ingress" -}}
-{{- end -}}

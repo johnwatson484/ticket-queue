@@ -1,9 +1,9 @@
 services:
-  hapi-template-ts:
+  ticket-queue:
     build:
       target: development
-    image: hapi-template-ts-development
-    container_name: hapi-template-ts-development
+    image: ticket-queue-development
+    container_name: ticket-queue-development
     ports:
       - "3000:3000"
       - "9229:9229"
@@ -11,9 +11,9 @@ services:
       - ./src:/home/node/src
       - ./package.json:/home/node/package.json
     networks:
-      - hapi-template-ts
+      - ticket-queue
 
 networks:
-  hapi-template-ts:
+  ticket-queue:
     driver: bridge
-    name: hapi-template-ts
+    name: ticket-queue

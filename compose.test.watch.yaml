@@ -1,5 +1,5 @@
 services:
-  hapi-template-ts:
+  ticket-queue:
     command: npm run test:watch
     volumes:
       - ./.git:/home/node/.git

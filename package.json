@@ -1,5 +1,5 @@
 {
-  "name": "hapi-template-ts",
+  "name": "ticket-queue",
   "version": "1.0.0",
   "description": "",
   "main": "src/dist/index.js",

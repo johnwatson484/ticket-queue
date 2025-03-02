@@ -1,5 +1,5 @@
 services:
-  hapi-template-ts:
+  ticket-queue:
     command: npm run test:debug
     ports:
       - "9229:9229"

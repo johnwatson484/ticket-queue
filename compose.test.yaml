@@ -1,9 +1,9 @@
 services:
-  hapi-template-ts:
+  ticket-queue:
     build:
       target: development
-    image: hapi-template-ts-test
-    container_name: hapi-template-ts-test
+    image: ticket-queue-test
+    container_name: ticket-queue-test
     command: npm run test
     volumes:
       - ./test:/home/node/test

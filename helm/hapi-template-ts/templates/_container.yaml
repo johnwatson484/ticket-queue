@@ -1,2 +1,0 @@
-{{- define "hapi-template-ts.container" -}}
-{{- end -}}
