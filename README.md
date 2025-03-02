@@ -1,5 +1,5 @@
-# Hapi Template (TypeScript)
-Quick start new Node.js project using Hapi.js and TypeScript.
+# Ticket Queue
+Basic ticket booking system using Node.js, TypeScript, Hapi.js, and MongoDB.
 
 ## Prerequisites
 
