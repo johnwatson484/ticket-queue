@@ -2,6 +2,8 @@ import crypto from 'crypto'
 import { MongoClient } from 'mongodb'
 import config from '../config.js'
 
+const RESERVATION_EXPIRATION = 1 * 60 * 1000
+
 const client: MongoClient = new MongoClient(config.get('mongoUri'))
 await client.connect()
 
@@ -9,7 +11,7 @@ const db: any = client.db('ticket-queue')
 const collection: any = db.collection('tickets')
 
 async function countAvailableTickets () : Promise<number> {
-  const reserveExpirationDate = new Date(Date.now() - 1 * 60 * 1000).toISOString()
+  const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
   return collection.countDocuments({
     $or: [
       { reservedDate: undefined },
@@ -34,9 +36,9 @@ async function deleteAllTickets () : Promise<void> {
   await collection.deleteMany({})
 }
 
-async function reserveTickets (numberToReserve: number) : Promise<string> {
+async function reserveTickets (numberToReserve: number) : Promise<Reservation> {
   const bookingNumber: string = createBookingNumber()
-  const reserveExpirationDate = new Date(Date.now() - 1 * 60 * 1000).toISOString()
+  const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
 
   const ticketsToReserve = await collection.find(
     {
@@ -61,7 +63,14 @@ async function reserveTickets (numberToReserve: number) : Promise<string> {
     { upsert: false, multi: true }
   )
 
-  return bookingNumber
+  const reservation: Reservation = {
+    bookingNumber,
+    tickets: numberToReserve,
+    reservedDate: new Date(),
+    expirationDate: new Date(Date.now() + RESERVATION_EXPIRATION)
+  }
+
+  return reservation
 }
 
 async function getUnpaidTicketsByBookingNumber (bookingNumber: string) : Promise<Ticket[]> {
@@ -76,11 +85,25 @@ async function getTicketsByBookingNumber (bookingNumber: string) : Promise<Ticke
   return collection.find({ bookingNumber, confirmedDate: { $ne: undefined } }).toArray()
 }
 
+function getReservationExpirationDate (reservedDate: Date | undefined) : Date {
+  if (!reservedDate) {
+    throw new Error('Invalid reserved date')
+  }
+  return new Date(new Date(reservedDate).getTime() + RESERVATION_EXPIRATION)
+}
+
 type Ticket = {
   _id: number | undefined
   reservedDate: Date | undefined
   confirmedDate: Date | undefined
   bookingNumber: string | undefined
+}
+
+type Reservation = {
+  bookingNumber: string
+  tickets: number
+  reservedDate: Date
+  expirationDate: Date
 }
 
 async function payForTickets (bookingNumber: string, tickets: number) : Promise<void> {
@@ -109,5 +132,7 @@ export {
   getTicketsByBookingNumber,
   getUnpaidTicketsByBookingNumber,
   Ticket,
-  payForTickets
+  Reservation,
+  payForTickets,
+  getReservationExpirationDate,
 }

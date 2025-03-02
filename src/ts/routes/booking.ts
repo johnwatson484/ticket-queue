@@ -1,5 +1,5 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
-import { countAvailableTickets, reserveTickets, getTicketsByBookingNumber, Ticket, getUnpaidTicketsByBookingNumber, payForTickets } from '../data/index.js'
+import { countAvailableTickets, reserveTickets, getTicketsByBookingNumber, Ticket, getUnpaidTicketsByBookingNumber, payForTickets, Reservation, getReservationExpirationDate } from '../data/index.js'
 import Joi from 'joi'
 
 const routes: ServerRoute[] = [{
@@ -30,8 +30,8 @@ const routes: ServerRoute[] = [{
     }
 
     try {
-      const bookingNumber: string = await reserveTickets(requiredTickets)
-      return h.redirect(`/booking/payment/${bookingNumber}`)
+      const reservation: Reservation = await reserveTickets(requiredTickets)
+      return h.redirect(`/booking/payment/${reservation.bookingNumber}`)
     } catch (err: any) {
       if (err?.message === 'Tickets not available') {
         return h.redirect('/booking/unavailable')
@@ -54,7 +54,8 @@ const routes: ServerRoute[] = [{
     if (tickets.length === 0) {
       return h.view('404').code(404)
     }
-    return h.view('payment', { bookingNumber: request.params.bookingNumber, tickets })
+    const expirationDate: string = getReservationExpirationDate(tickets[0].reservedDate).toLocaleString()
+    return h.view('payment', { bookingNumber: request.params.bookingNumber, tickets, expirationDate })
   }
 }, {
   method: 'POST',
