@@ -1,0 +1,17 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+  <h1>Ticket administration</h1>
+
+  <p>There are currently {{ availableTickets }} available tickets.</p>
+
+  <form action="/tickets/create" method="post">
+    <input type="hidden" name="crumb" value="{{ crumb }}">
+    <button type="submit" class="btn btn-primary">Release new tickets</button>
+  </form>
+
+  <form action="/tickets/delete" method="post">
+    <input type="hidden" name="crumb" value="{{ crumb }}">
+    <button type="submit" class="btn btn-primary">Delete all tickets</button>
+  </form>
+{% endblock %}

@@ -1,7 +1,8 @@
 import { Server, ServerRoute } from '@hapi/hapi'
 import home from '../routes/home.js'
 import queue from '../routes/queue.js'
-import book from '../routes/booking.js'
+import booking from '../routes/booking.js'
+import tickets from '../routes/tickets.js'
 import assets from '../routes/assets.js'
 import health from '../routes/health.js'
 
@@ -12,7 +13,8 @@ const plugin: any = {
       server.route(new Array<ServerRoute>().concat(
         home,
         queue,
-        book,
+        booking,
+        tickets,
         assets,
         health
       ))
