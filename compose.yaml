@@ -3,3 +3,5 @@ services:
     build: .
     image: ticket-queue
     container_name: ticket-queue
+    environment:
+      MONGO_URI: ${MONGO_URI}

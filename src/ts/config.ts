@@ -31,8 +31,14 @@ const config = convict({
   appName: {
     doc: 'The name of the application.',
     format: String,
-    default: 'Hapi Template',
+    default: 'Ticket Queue',
     env: 'APP_NAME',
+  },
+  mongoUri: {
+    doc: 'The URI of the MongoDB database.',
+    format: String,
+    default: '',
+    env: 'MONGO_URI',
   },
 })
 
