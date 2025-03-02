@@ -1,0 +1,6 @@
+{{- include "helm-library.configmap" (list . "hapi-template-ts.configmap") -}}
+{{- define "hapi-template-ts.configmap" -}}
+data:
+  PORT: {{ .Values.container.port | quote }}
+  NODE_ENV: {{ .Values.configMap.environment | quote }}
+{{- end -}}

@@ -1,0 +1,10 @@
+services:
+  hapi-template-ts:
+    build:
+      target: development
+    image: hapi-template-ts-test
+    container_name: hapi-template-ts-test
+    command: npm run test
+    volumes:
+      - ./test:/home/node/test
+      - ./test-output:/home/node/test-output

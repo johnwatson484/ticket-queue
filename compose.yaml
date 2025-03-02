@@ -1,0 +1,5 @@
+services:
+  hapi-template-ts:
+    build: .
+    image: hapi-template-ts
+    container_name: hapi-template-ts
