@@ -9,7 +9,14 @@ const db: any = client.db('ticket-queue')
 const collection: any = db.collection('tickets')
 
 async function countAvailableTickets () : Promise<number> {
-  return collection.countDocuments({ reservedDate: undefined, confirmedDate: undefined })
+  const reserveExpirationDate = new Date(Date.now() - 1 * 60 * 1000).toISOString()
+  return collection.countDocuments({
+    $or: [
+      { reservedDate: undefined },
+      { reservedDate: { $lt: reserveExpirationDate } }
+    ],
+    confirmedDate: undefined
+  })
 }
 
 async function createTickets (numberToCreate: number = 5) : Promise<void> {
@@ -29,13 +36,13 @@ async function deleteAllTickets () : Promise<void> {
 
 async function reserveTickets (numberToReserve: number) : Promise<string> {
   const bookingNumber: string = createBookingNumber()
-  const twentyMinutesAgo = new Date(Date.now() - 20 * 60 * 1000).toISOString()
+  const reserveExpirationDate = new Date(Date.now() - 1 * 60 * 1000).toISOString()
 
   const ticketsToReserve = await collection.find(
     {
       $or: [
         { reservedDate: undefined },
-        { reservedDate: { $lt: twentyMinutesAgo } }
+        { reservedDate: { $lt: reserveExpirationDate } }
       ],
       confirmedDate: undefined
     }
