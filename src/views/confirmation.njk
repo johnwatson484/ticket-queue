@@ -2,4 +2,12 @@
 
 {% block content %}
   <h1>Your booking confirmation</h1>
+
+  <p>You have successfully booked {{ tickets.length }} tickets.</p>
+
+  <h3>Booking number: {{ tickets[0].bookingNumber }}</h3>
+
+  {% for ticket in tickets %}
+    <p>Ticket number: {{ ticket._id }}</p>
+  {% endfor %}
 {% endblock %}

@@ -1,0 +1,16 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+  <h1>Payment</h1>
+
+  <p>You are paying for {{ tickets.length }} tickets.</p>
+
+  <h3>Booking number: {{ bookingNumber }}</h3>
+
+  <form action="/booking/payment" method="post">
+    <input type="hidden" name="crumb" value="{{ crumb }}">
+    <input type="hidden" name="bookingNumber" value="{{ bookingNumber }}">
+    <input type="hidden" name="tickets" value="{{ tickets.length }}">
+    <button type="submit" class="btn btn-primary">Pay for {{ tickets.length }} tickets</button>
+  </form>
+{% endblock %}
