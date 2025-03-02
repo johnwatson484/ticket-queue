@@ -1,6 +1,6 @@
 import crypto from 'crypto'
 import { MongoClient } from 'mongodb'
-import config from '../config.js'
+import config from './config.js'
 
 const RESERVATION_EXPIRATION = 1 * 60 * 1000
 
@@ -156,11 +156,11 @@ export {
   countAvailableTickets,
   createTickets,
   deleteAllTickets,
-  reserveTickets,
+  getReservationExpirationDate,
   getTicketsByBookingNumber,
   getUnpaidTicketsByBookingNumber,
+  payForTickets,
+  reserveTickets,
   Ticket,
   Reservation,
-  payForTickets,
-  getReservationExpirationDate,
 }

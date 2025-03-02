@@ -1,5 +1,5 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
-import { countAvailableTickets } from '../data/index.js'
+import { countAvailableTickets } from '../tickets.js'
 
 const route: ServerRoute = {
   method: 'POST',
