@@ -6,12 +6,16 @@
   <p>There are currently {{ availableTickets }} available tickets.</p>
 
   <form action="/tickets/create" method="post">
-    <input type="hidden" name="crumb" value="{{ crumb }}">
-    <button type="submit" class="btn btn-primary">Release new tickets</button>
+    <div class="mb-3">
+      <input type="hidden" name="crumb" value="{{ crumb }}">
+      <button type="submit" class="btn btn-primary">Release new tickets</button>
+    </div>
   </form>
 
   <form action="/tickets/delete" method="post">
-    <input type="hidden" name="crumb" value="{{ crumb }}">
-    <button type="submit" class="btn btn-primary">Delete all tickets</button>
+    <div class="mb-3">
+      <input type="hidden" name="crumb" value="{{ crumb }}">
+      <button type="submit" class="btn btn-primary">Delete all tickets</button>
+    </div>
   </form>
 {% endblock %}

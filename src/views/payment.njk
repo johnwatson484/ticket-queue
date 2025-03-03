@@ -13,6 +13,8 @@
     <input type="hidden" name="crumb" value="{{ crumb }}">
     <input type="hidden" name="bookingNumber" value="{{ bookingNumber }}">
     <input type="hidden" name="tickets" value="{{ tickets.length }}">
-    <button type="submit" class="btn btn-primary">Pay for {{ tickets.length }} tickets</button>
+    <div class="mb-3">
+      <button type="submit" class="btn btn-primary">Pay for {{ tickets.length }} tickets</button>
+    </div>
   </form>
 {% endblock %}

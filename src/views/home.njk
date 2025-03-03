@@ -4,7 +4,9 @@
   <h1>Book a ticket</h1>
 
   <form action="/queue/join" method="post">
-    <input type="hidden" name="crumb" value="{{ crumb }}">
-    <button type="submit" class="btn btn-primary">Join the queue</button>
+    <div class="mb-3">
+      <input type="hidden" name="crumb" value="{{ crumb }}">
+      <button type="submit" class="btn btn-primary">Join the queue</button>
+    </div>
   </form>
 {% endblock %}
