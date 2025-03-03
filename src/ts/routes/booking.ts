@@ -1,15 +1,14 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
 import {
-  countAvailableTickets,
   getReservationExpirationDate,
   getTicketsByBookingNumber,
   getUnpaidTicketsByBookingNumber,
   payForTickets,
   reserveTickets,
-  Ticket,
-  Reservation,
-} from '../tickets.js'
+} from '../services/booking.js'
 import Joi from 'joi'
+import { countAvailableTickets } from '../services/tickets.js'
+import { Reservation, Ticket } from '../types.js'
 
 const routes: ServerRoute[] = [{
   method: 'GET',

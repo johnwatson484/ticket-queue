@@ -1,40 +1,9 @@
 import crypto from 'crypto'
-import { MongoClient } from 'mongodb'
-import config from './config.js'
+import { ObjectId } from 'mongodb'
+import { Ticket, Reservation } from '../types.js'
+import { client, collection } from '../mongo.js'
 
 const RESERVATION_EXPIRATION = 1 * 60 * 1000
-
-const client: MongoClient = new MongoClient(config.get('mongoUri'))
-await client.connect()
-
-const db: any = client.db('ticket-queue')
-const collection: any = db.collection('tickets')
-
-async function countAvailableTickets () : Promise<number> {
-  const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
-  return collection.countDocuments({
-    $or: [
-      { reservedDate: undefined },
-      { reservedDate: { $lt: reserveExpirationDate } }
-    ],
-    confirmedDate: undefined
-  })
-}
-
-async function createTickets (numberToCreate: number = 5) : Promise<void> {
-  const tickets: Ticket[] = Array.from({ length: numberToCreate }, () => ({
-    _id: undefined,
-    reservedDate: undefined,
-    confirmedDate: undefined,
-    bookingNumber: undefined,
-  }))
-
-  await collection.insertMany(tickets)
-}
-
-async function deleteAllTickets () : Promise<void> {
-  await collection.deleteMany({})
-}
 
 async function reserveTickets (numberToReserve: number): Promise<Reservation> {
   const session = client.startSession()
@@ -44,7 +13,7 @@ async function reserveTickets (numberToReserve: number): Promise<Reservation> {
     const bookingNumber: string = createBookingNumber()
     const reserveExpirationDate = new Date(Date.now() - RESERVATION_EXPIRATION).toISOString()
 
-    const ticketsToReserve = await collection.find(
+    const ticketsToReserve: Ticket[] = await collection.find(
       {
         $or: [
           { reservedDate: undefined },
@@ -59,7 +28,7 @@ async function reserveTickets (numberToReserve: number): Promise<Reservation> {
       throw new Error('Tickets not available')
     }
 
-    const ticketIds = ticketsToReserve.map((ticket: { _id: any }) => ticket._id)
+    const ticketIds: ObjectId[] = ticketsToReserve.map((ticket: Ticket) => ticket._id)
     const reservedDate = new Date().toISOString()
 
     await collection.updateMany(
@@ -68,17 +37,15 @@ async function reserveTickets (numberToReserve: number): Promise<Reservation> {
       { session, upsert: false }
     )
 
-    const reservation: Reservation = {
+    await session.commitTransaction()
+    session.endSession()
+
+    return {
       bookingNumber,
       tickets: numberToReserve,
       reservedDate: new Date(),
       expirationDate: new Date(Date.now() + RESERVATION_EXPIRATION)
     }
-
-    await session.commitTransaction()
-    session.endSession()
-
-    return reservation
   } catch (error) {
     await session.abortTransaction()
     session.endSession()
@@ -86,12 +53,12 @@ async function reserveTickets (numberToReserve: number): Promise<Reservation> {
   }
 }
 
-async function getUnpaidTicketsByBookingNumber (bookingNumber: string) : Promise<Ticket[]> {
-  return collection.find({ reservedDate: { $ne: undefined }, confirmedDate: undefined, bookingNumber }).toArray()
-}
-
 function createBookingNumber () : string {
   return crypto.randomUUID()
+}
+
+async function getUnpaidTicketsByBookingNumber (bookingNumber: string) : Promise<Ticket[]> {
+  return collection.find({ reservedDate: { $ne: undefined }, confirmedDate: undefined, bookingNumber }).toArray()
 }
 
 async function getTicketsByBookingNumber (bookingNumber: string) : Promise<Ticket[]> {
@@ -103,20 +70,6 @@ function getReservationExpirationDate (reservedDate: Date | undefined) : Date {
     throw new Error('Invalid reserved date')
   }
   return new Date(new Date(reservedDate).getTime() + RESERVATION_EXPIRATION)
-}
-
-type Ticket = {
-  _id: number | undefined
-  reservedDate: Date | undefined
-  confirmedDate: Date | undefined
-  bookingNumber: string | undefined
-}
-
-type Reservation = {
-  bookingNumber: string
-  tickets: number
-  reservedDate: Date
-  expirationDate: Date
 }
 
 async function payForTickets (bookingNumber: string, tickets: number): Promise<void> {
@@ -133,7 +86,7 @@ async function payForTickets (bookingNumber: string, tickets: number): Promise<v
       throw new Error('Tickets not available')
     }
 
-    const ticketIds = unpaidTickets.map((ticket: { _id: any }) => ticket._id)
+    const ticketIds: ObjectId[] = unpaidTickets.map((ticket: Ticket) => ticket._id)
     const confirmedDate = new Date().toISOString()
 
     await collection.updateMany(
@@ -152,15 +105,9 @@ async function payForTickets (bookingNumber: string, tickets: number): Promise<v
 }
 
 export {
-  client,
-  countAvailableTickets,
-  createTickets,
-  deleteAllTickets,
   getReservationExpirationDate,
   getTicketsByBookingNumber,
   getUnpaidTicketsByBookingNumber,
   payForTickets,
   reserveTickets,
-  Ticket,
-  Reservation,
 }

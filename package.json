@@ -34,6 +34,7 @@
     "@types/hapi__vision": "5.5.8",
     "@types/hapi-pino": "9.1.2",
     "@types/joi": "17.2.2",
+    "@types/mongodb": "4.0.6",
     "@types/nunjucks": "3.2.6",
     "convict": "6.2.4",
     "convict-format-with-validator": "6.2.0",
