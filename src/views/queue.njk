@@ -1,0 +1,15 @@
+{% extends '_layout.njk' %}
+
+{% block content %}
+  <h2>Waiting in the queue</h2>
+
+  <div class="d-flex justify-content-center">
+    <div class="spinner-border" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+{% endblock %}
+
+{% block bodyEnd %}
+  <script src="{{ assetPath }}/queue.js"></script>
+{% endblock %}

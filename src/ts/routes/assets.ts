@@ -6,7 +6,6 @@ const route: ServerRoute = {
   handler: {
     directory: {
       path: [
-        'src/assets/css',
         'src/assets/js',
       ],
     },
