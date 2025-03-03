@@ -5,3 +5,4 @@ services:
     container_name: ticket-queue
     environment:
       MONGO_URI: ${MONGO_URI}
+      SESSION_PASSWORD: ${SESSION_PASSWORD:-this-secret-needs-to-be-at-least-32-characters-long}

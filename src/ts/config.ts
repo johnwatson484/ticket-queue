@@ -40,6 +40,12 @@ const config = convict({
     default: '',
     env: 'MONGO_URI',
   },
+  sessionPassword: {
+    doc: 'The password for the session cookie.',
+    format: String,
+    default: null,
+    env: 'SESSION_PASSWORD',
+  },
 })
 
 config.validate({ allowed: 'strict' })
