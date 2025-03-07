@@ -11,5 +11,18 @@
 {% endblock %}
 
 {% block bodyEnd %}
-  <script src="{{ assetPath }}/queue.js"></script>
+  <script>
+    const ws = new WebSocket('ws://localhost:3000/queue/ws')
+
+    const queueId = '{{ queueId }}'
+
+    ws.onopen = () => {
+      ws.send(JSON.stringify({queueId}))
+    }
+    ws.onmessage = (event) => {
+      if (event.data === `${queueId}-processed`) {
+        window.location.href = '/booking'
+      }
+    }
+  </script>
 {% endblock %}
