@@ -1,6 +1,9 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
 import { countAvailableTickets } from '../services/tickets.js'
-import { addToWaitingQueue, hasBeenProcessed } from '../services/queue.js'
+import {
+  addToWaitingQueue, countWaitingQueue, getPositionInQueue
+  , hasBeenProcessed
+} from '../services/queue.js'
 
 const route: ServerRoute[] = [{
   method: 'POST',
@@ -36,13 +39,15 @@ const route: ServerRoute[] = [{
 
           ws.on('message', (message: string) => {
             const { queueId } = JSON.parse(message)
-            console.log(`Client subscribed with queueId: ${queueId}`)
 
             const interval = setInterval(() => {
               if (hasBeenProcessed(queueId)) {
                 ws.send(JSON.stringify({ queueId, status: 'processed' }))
                 clearInterval(interval)
                 ws.close()
+              } else {
+                const position: number = getPositionInQueue(queueId)
+                ws.send(JSON.stringify({ queueId, status: 'waiting', position }))
               }
             }, 1000)
           })
@@ -51,7 +56,8 @@ const route: ServerRoute[] = [{
     }
   },
   handler: (_request: Request, h: ResponseToolkit): ResponseObject => {
-    return h.response({ status: 'accepted' })
+    const position: number = countWaitingQueue()
+    return h.response({ status: 'accepted', position })
   },
 }]
 

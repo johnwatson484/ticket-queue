@@ -8,6 +8,7 @@
       <span class="visually-hidden">Loading...</span>
     </div>
   </div>
+  <p id="position">You have joined the queue</p>
 {% endblock %}
 
 {% block bodyEnd %}
@@ -23,6 +24,8 @@
       const data = JSON.parse(event.data)
       if (data.status === 'processed' && data.queueId === queueId) {
         window.location.href = '/booking'
+      } else {
+        document.getElementById('position').innerText = `You are ${data.position} in the queue`
       }
     }
   </script>

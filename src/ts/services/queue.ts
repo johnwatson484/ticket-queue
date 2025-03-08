@@ -10,21 +10,35 @@ function processQueue () {
 }
 
 function addToWaitingQueue (queueId: string): void {
-  waitingQueue.push(queueId)
+  if (!isInWaitingQueue(queueId)) {
+    waitingQueue.push(queueId)
+  }
 }
 
 function isInWaitingQueue (queueId: string): boolean {
   return waitingQueue.includes(queueId)
 }
 
+function countWaitingQueue (): number {
+  return waitingQueue.length
+}
+
+function getPositionInQueue
+(queueId: string): number {
+  return waitingQueue.indexOf(queueId)
+}
+
 function hasBeenProcessed (queueId: string): boolean {
   return processedQueue.includes(queueId)
 }
 
-setInterval(processQueue, 5000)
+setInterval(processQueue, 10000)
 
 export {
   addToWaitingQueue,
+  countWaitingQueue,
+  getPositionInQueue
+  ,
   isInWaitingQueue,
   hasBeenProcessed,
 }
