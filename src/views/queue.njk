@@ -20,7 +20,8 @@
       ws.send(JSON.stringify({queueId}))
     }
     ws.onmessage = (event) => {
-      if (event.data === `${queueId}-processed`) {
+      const data = JSON.parse(event.data)
+      if (data.status === 'processed' && data.queueId === queueId) {
         window.location.href = '/booking'
       }
     }

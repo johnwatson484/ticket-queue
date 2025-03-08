@@ -1,5 +1,6 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
 import { countAvailableTickets } from '../services/tickets.js'
+import { addToWaitingQueue, hasBeenProcessed } from '../services/queue.js'
 
 const route: ServerRoute[] = [{
   method: 'POST',
@@ -18,7 +19,7 @@ const route: ServerRoute[] = [{
   path: '/queue',
   handler: (request: Request, h: ResponseToolkit): ResponseObject => {
     const queueId: string = request.yar.id
-    waitingQueue.push(queueId)
+    addToWaitingQueue(queueId)
     return h.view('queue', { queueId })
   }
 }, {
@@ -30,16 +31,16 @@ const route: ServerRoute[] = [{
       websocket: {
         only: true,
         autoping: 5 * 1000,
-        connect: ({ ws, _request }) => {
+        connect: ({ ws }: { ws: WebSocket }) => {
           console.log('WebSocket connected')
 
-          ws.on('message', (message) => {
+          ws.on('message', (message: string) => {
             const { queueId } = JSON.parse(message)
             console.log(`Client subscribed with queueId: ${queueId}`)
 
             const interval = setInterval(() => {
-              if (processedQueue.includes(queueId)) {
-                ws.send(`${queueId}-processed`)
+              if (hasBeenProcessed(queueId)) {
+                ws.send(JSON.stringify({ queueId, status: 'processed' }))
                 clearInterval(interval)
                 ws.close()
               }
@@ -50,21 +51,8 @@ const route: ServerRoute[] = [{
     }
   },
   handler: (_request: Request, h: ResponseToolkit): ResponseObject => {
-    return h.response('WebSocket endpoint')
+    return h.response({ status: 'accepted' })
   },
 }]
-
-const waitingQueue: string[] = []
-const processedQueue: string[] = []
-
-function processQueue () {
-  if (waitingQueue.length > 0) {
-    const queueId: string = waitingQueue.shift()
-    console.log(`Processing queueId: ${queueId}`)
-    processedQueue.push(queueId)
-  }
-}
-
-setInterval(processQueue, 5000)
 
 export default route
