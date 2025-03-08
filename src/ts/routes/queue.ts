@@ -1,5 +1,6 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
 import { countAvailableTickets } from '../services/tickets.js'
+import WebSocket from 'ws'
 import {
   addToWaitingQueue, countWaitingQueue, getPositionInQueue
   , hasBeenProcessed
@@ -28,7 +29,7 @@ const route: ServerRoute[] = [{
 }, {
   method: 'POST',
   path: '/queue/ws',
-  config: {
+  options: {
     plugins: {
       crumb: false,
       websocket: {
