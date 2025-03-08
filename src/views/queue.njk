@@ -22,7 +22,7 @@
     }
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      if (data.status === 'processed' && data.queueId === queueId) {
+      if (data.status === 'accepted' && data.queueId === queueId) {
         window.location.href = '/booking'
       } else {
         document.getElementById('position').innerText = `You are ${data.position} in the queue`

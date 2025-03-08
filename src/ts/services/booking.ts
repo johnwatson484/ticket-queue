@@ -2,6 +2,7 @@ import crypto from 'crypto'
 import { ObjectId } from 'mongodb'
 import { Ticket, Reservation } from '../types.js'
 import { client, collection } from '../mongo.js'
+import { removeFromInProgressQueue } from './queue.js'
 
 const RESERVATION_EXPIRATION = 1 * 60 * 1000
 
@@ -72,7 +73,7 @@ function getReservationExpirationDate (reservedDate: Date | undefined) : Date {
   return new Date(new Date(reservedDate).getTime() + RESERVATION_EXPIRATION)
 }
 
-async function payForTickets (bookingNumber: string, tickets: number): Promise<void> {
+async function payForTickets (bookingNumber: string, tickets: number, queueId: string): Promise<void> {
   const session = client.startSession()
   session.startTransaction()
 
@@ -94,6 +95,8 @@ async function payForTickets (bookingNumber: string, tickets: number): Promise<v
       { $set: { confirmedDate } },
       { session, upsert: false }
     )
+
+    removeFromInProgressQueue(queueId)
 
     await session.commitTransaction()
   } catch (error) {

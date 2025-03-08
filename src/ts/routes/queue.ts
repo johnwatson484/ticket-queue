@@ -1,10 +1,7 @@
 import { ServerRoute, Request, ResponseToolkit, ResponseObject } from '@hapi/hapi'
-import { countAvailableTickets } from '../services/tickets.js'
 import WebSocket from 'ws'
-import {
-  addToWaitingQueue, countWaitingQueue, getPositionInQueue
-  , hasBeenProcessed
-} from '../services/queue.js'
+import { countAvailableTickets } from '../services/tickets.js'
+import { addToWaitingQueue, countWaitingQueue, getPositionInQueue, isInProgress } from '../services/queue.js'
 
 const route: ServerRoute[] = [{
   method: 'POST',
@@ -42,8 +39,8 @@ const route: ServerRoute[] = [{
             const { queueId } = JSON.parse(message)
 
             const interval = setInterval(() => {
-              if (hasBeenProcessed(queueId)) {
-                ws.send(JSON.stringify({ queueId, status: 'processed' }))
+              if (isInProgress(queueId)) {
+                ws.send(JSON.stringify({ queueId, status: 'accepted' }))
                 clearInterval(interval)
                 ws.close()
               } else {

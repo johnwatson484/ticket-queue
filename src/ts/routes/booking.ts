@@ -9,11 +9,16 @@ import {
 import Joi from 'joi'
 import { countAvailableTickets } from '../services/tickets.js'
 import { Reservation, Ticket } from '../types.js'
+import { isInProgress } from '../services/queue.js'
 
 const routes: ServerRoute[] = [{
   method: 'GET',
   path: '/booking',
-  handler: (_request: Request, h: ResponseToolkit): ResponseObject => {
+  handler: (request: Request, h: ResponseToolkit): ResponseObject => {
+    const queueId: string = request.yar.id
+    if (!isInProgress(queueId)) {
+      return h.redirect('/queue')
+    }
     return h.view('booking')
   },
 }, {
@@ -30,6 +35,10 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
+    if (!isInProgress(request.yar.id)) {
+      return h.redirect('/queue')
+    }
+
     const { tickets: requiredTickets } = request.payload as { tickets: number }
     const availableTickets: number = await countAvailableTickets()
 
@@ -58,6 +67,10 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
+    if (!isInProgress(request.yar.id)) {
+      return h.redirect('/queue')
+    }
+
     const tickets: Ticket[] = await getUnpaidTicketsByBookingNumber(request.params.bookingNumber)
     if (tickets.length === 0) {
       return h.view('404').code(404)
@@ -80,9 +93,14 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
+    if (!isInProgress(request.yar.id)) {
+      return h.redirect('/queue')
+    }
+
     const { bookingNumber, tickets } = request.payload as { bookingNumber: string, tickets: number }
+    const queueId: string = request.yar.id
     try {
-      await payForTickets(bookingNumber, tickets)
+      await payForTickets(bookingNumber, tickets, queueId)
       return h.redirect(`/booking/confirmation/${bookingNumber}`)
     } catch (err: any) {
       if (err?.message === 'Tickets not available') {
