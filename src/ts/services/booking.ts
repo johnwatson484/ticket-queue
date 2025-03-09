@@ -73,7 +73,7 @@ function getReservationExpirationDate (reservedDate: Date | undefined) : Date {
   return new Date(new Date(reservedDate).getTime() + RESERVATION_EXPIRATION)
 }
 
-async function payForTickets (bookingNumber: string, tickets: number, queueId: string): Promise<void> {
+async function payForTickets (bookingNumber: string, tickets: number, userId: string): Promise<void> {
   const session = client.startSession()
   session.startTransaction()
 
@@ -96,7 +96,7 @@ async function payForTickets (bookingNumber: string, tickets: number, queueId: s
       { session, upsert: false }
     )
 
-    removeFromInProgressQueue(queueId)
+    removeFromInProgressQueue(userId)
 
     await session.commitTransaction()
   } catch (error) {

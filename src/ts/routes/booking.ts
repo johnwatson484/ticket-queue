@@ -15,8 +15,8 @@ const routes: ServerRoute[] = [{
   method: 'GET',
   path: '/booking',
   handler: (request: Request, h: ResponseToolkit): ResponseObject => {
-    const queueId: string = request.yar.id
-    if (!isInProgress(queueId)) {
+    const userId: string = request.yar.id
+    if (!isInProgress(userId)) {
       return h.redirect('/queue')
     }
     return h.view('booking')
@@ -98,9 +98,9 @@ const routes: ServerRoute[] = [{
     }
 
     const { bookingNumber, tickets } = request.payload as { bookingNumber: string, tickets: number }
-    const queueId: string = request.yar.id
+    const userId: string = request.yar.id
     try {
-      await payForTickets(bookingNumber, tickets, queueId)
+      await payForTickets(bookingNumber, tickets, userId)
       return h.redirect(`/booking/confirmation/${bookingNumber}`)
     } catch (err: any) {
       if (err?.message === 'Tickets not available') {

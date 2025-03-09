@@ -15,14 +15,14 @@
   <script>
     const ws = new WebSocket('ws://localhost:3000/queue/ws')
 
-    const queueId = '{{ queueId }}'
+    const userId = '{{ userId }}'
 
     ws.onopen = () => {
-      ws.send(JSON.stringify({queueId}))
+      ws.send(JSON.stringify({userId}))
     }
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data)
-      if (data.status === 'accepted' && data.queueId === queueId) {
+      if (data.status === 'accepted' && data.userId === userId) {
         window.location.href = '/booking'
       } else {
         document.getElementById('position').innerText = `You are ${data.position} in the queue`

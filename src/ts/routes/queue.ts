@@ -19,9 +19,9 @@ const route: ServerRoute[] = [{
   method: 'GET',
   path: '/queue',
   handler: (request: Request, h: ResponseToolkit): ResponseObject => {
-    const queueId: string = request.yar.id
-    addToWaitingQueue(queueId)
-    return h.view('queue', { queueId })
+    const userId: string = request.yar.id
+    addToWaitingQueue(userId)
+    return h.view('queue', { userId })
   }
 }, {
   method: 'POST',
@@ -36,16 +36,16 @@ const route: ServerRoute[] = [{
           console.log('WebSocket connected')
 
           ws.on('message', (message: string) => {
-            const { queueId } = JSON.parse(message)
+            const { userId } = JSON.parse(message)
 
             const interval = setInterval(() => {
-              if (isInProgress(queueId)) {
-                ws.send(JSON.stringify({ queueId, status: 'accepted' }))
+              if (isInProgress(userId)) {
+                ws.send(JSON.stringify({ userId, status: 'accepted' }))
                 clearInterval(interval)
                 ws.close()
               } else {
-                const position: number = getPositionInQueue(queueId)
-                ws.send(JSON.stringify({ queueId, status: 'waiting', position }))
+                const position: number = getPositionInQueue(userId)
+                ws.send(JSON.stringify({ userId, status: 'waiting', position }))
               }
             }, 1000)
           })
