@@ -13,7 +13,7 @@
     "start:nodemon": "nodemon --inspect=0.0.0.0 --ext js,css,njk --legacy-watch src/dist/index.js",
     "start:debug": "nodemon --inspect-brk=0.0.0.0 --ext js --legacy-watch src/dist/index.js",
     "build": "tsc",
-    "build:watch": "tsc --watch",
+    "build:watch": "tsc --watch --sourceMap",
     "build:start": "npm run build && node src/dist/index.js"
   },
   "author": "John Watson",
