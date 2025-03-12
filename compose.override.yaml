@@ -38,8 +38,10 @@ services:
       - '27017:27017'
     volumes:
       - mongodb-data:/data
+      - ./scripts/mongo:/docker-entrypoint-initdb.d
     networks:
       - ticket-queue
+    command: --replSet rs0
 
 networks:
   ticket-queue:

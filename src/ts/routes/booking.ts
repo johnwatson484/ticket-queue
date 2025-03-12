@@ -14,9 +14,10 @@ import { isInProgress } from '../services/queue.js'
 const routes: ServerRoute[] = [{
   method: 'GET',
   path: '/booking',
-  handler: (request: Request, h: ResponseToolkit): ResponseObject => {
+  handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
     const userId: string = request.yar.id
-    if (!isInProgress(userId)) {
+    const inProgress: boolean = await isInProgress(userId)
+    if (!inProgress) {
       return h.redirect('/queue')
     }
     return h.view('booking')
@@ -35,7 +36,8 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
-    if (!isInProgress(request.yar.id)) {
+    const inProgress: boolean = await isInProgress(request.yar.id)
+    if (!inProgress) {
       return h.redirect('/queue')
     }
 
@@ -67,7 +69,8 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
-    if (!isInProgress(request.yar.id)) {
+    const inProgress: boolean = await isInProgress(request.yar.id)
+    if (!inProgress) {
       return h.redirect('/queue')
     }
 
@@ -93,7 +96,8 @@ const routes: ServerRoute[] = [{
     },
   },
   handler: async (request: Request, h: ResponseToolkit): Promise<ResponseObject> => {
-    if (!isInProgress(request.yar.id)) {
+    const inProgress: boolean = await isInProgress(request.yar.id)
+    if (!inProgress) {
       return h.redirect('/queue')
     }
 

@@ -40,6 +40,12 @@ const config = convict({
     default: '',
     env: 'MONGO_URI',
   },
+  redisUri: {
+    doc: 'The URI of the Redis database.',
+    format: String,
+    default: '',
+    env: 'REDIS_URI',
+  },
   sessionPassword: {
     doc: 'The password for the session cookie.',
     format: String,

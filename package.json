@@ -38,6 +38,7 @@
     "@types/joi": "17.2.2",
     "@types/mongodb": "4.0.6",
     "@types/nunjucks": "3.2.6",
+    "@types/redis": "4.0.10",
     "convict": "6.2.4",
     "convict-format-with-validator": "6.2.0",
     "hapi-pino": "12.1.0",

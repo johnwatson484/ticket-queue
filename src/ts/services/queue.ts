@@ -1,40 +1,56 @@
-const waitingQueue: string[] = []
-const inProgressQueue: string[] = []
+import { client } from '../redis.js'
 
-function processQueue () {
-  if (inProgressQueue.length < 1) {
-    const userId: string | undefined = waitingQueue.shift()
+const WAITING_QUEUE = 'waiting-queue'
+const IN_PROGRESS = 'in-progress'
+const QUEUE_ITEM_TTL = 60 * 20 // 20 minutes
+
+async function processQueue () {
+  const usersInProcess: number = await countInProgress()
+
+  if (usersInProcess < 1) {
+    const userId: string | null = await client.lPop(WAITING_QUEUE)
+
     if (userId) {
       console.log(`Allowing entry to ${userId}`)
-      inProgressQueue.push(userId)
+      await client.set(`${IN_PROGRESS}:${userId}`, userId)
+      await client.expire(`${IN_PROGRESS}:${userId}`, QUEUE_ITEM_TTL)
     }
   }
 }
 
-function addToWaitingQueue (userId: string): void {
-  if (!isInWaitingQueue(userId)) {
-    waitingQueue.push(userId)
+async function countInProgress (): Promise<number> {
+  const keys: string[] = await client.keys(`${IN_PROGRESS}:*`)
+  return keys.length
+}
+
+async function addToWaitingQueue (userId: string): Promise<void> {
+  if (!await isInWaitingQueue(userId)) {
+    await client.rPush(WAITING_QUEUE, userId)
+    await client.expire(WAITING_QUEUE, QUEUE_ITEM_TTL)
   }
 }
 
-function isInWaitingQueue (userId: string): boolean {
-  return waitingQueue.includes(userId)
+async function isInWaitingQueue (userId: string): Promise<boolean> {
+  const queueContents: string[] = await client.lRange(WAITING_QUEUE, 0, -1)
+  return queueContents.includes(userId)
 }
 
-function countWaitingQueue (): number {
-  return waitingQueue.length
+async function countWaitingQueue (): Promise<number> {
+  return client.lLen(WAITING_QUEUE)
 }
 
-function getPositionInQueue (userId: string): number {
-  return waitingQueue.indexOf(userId) + 1
+async function getPositionInQueue (userId: string): Promise<number> {
+  const queueContents: string[] = await client.lRange(WAITING_QUEUE, 0, -1)
+  return queueContents.indexOf(userId) + 1
 }
 
-function isInProgress (userId: string): boolean {
-  return inProgressQueue.includes(userId)
+async function isInProgress (userId: string): Promise<boolean> {
+  const value: number = await client.exists(`${IN_PROGRESS}:${userId}`)
+  return value === 1
 }
 
-function removeFromInProgressQueue (userId: string): void {
-  inProgressQueue.splice(inProgressQueue.indexOf(userId), 1)
+async function removeFromInProgressQueue (userId: string): Promise<void> {
+  await client.del(`${IN_PROGRESS}:${userId}`)
   console.log(`Transaction completed for ${userId}`)
 }
 
