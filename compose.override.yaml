@@ -17,10 +17,6 @@ services:
         condition: service_started
       mongodb:
         condition: service_healthy
-    environment:
-      MONGO_URI: mongodb://mongodb:27017/ticket-queue
-      REDIS_URI: redis://redis:6379
-      SESSION_PASSWORD: ${SESSION_PASSWORD:-this-secret-needs-to-be-at-least-32-characters-long}
 
   redis:
     image: redis
