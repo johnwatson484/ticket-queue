@@ -5,8 +5,8 @@
   "main": "src/dist/index.js",
   "scripts": {
     "pretest": "npm run test:lint",
-    "test": "vitest",
-    "test:watch": "vitest --coverage=false --onlyChanged --watch",
+    "test": "vitest --watch=false --coverage",
+    "test:watch": "vitest --coverage=false",
     "test:lint": "eslint",
     "test:debug": "node --inspect-brk=0.0.0.0 ./node_modules/jest/bin/jest.js --coverage=false --onlyChanged --watch --runInBand --no-cache",
     "start:watch": "npm-run-all --parallel build:watch start:nodemon",
@@ -56,7 +56,8 @@
     "neostandard": "0.11.4",
     "nodemon": "3.1.4",
     "npm-run-all": "4.1.5",
-    "vitest": "3.0.8"
+    "vitest": "3.0.8",
+    "@vitest/coverage-v8": "3.0.8"
   },
   "nodemonConfig": {
     "ignore": [
