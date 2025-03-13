@@ -5,11 +5,15 @@ let client: MongoClient
 let collection: Collection
 
 async function connect (): Promise<void> {
-  client = new MongoClient(config.get('mongoUri'))
-  await client.connect()
+  if (!client) {
+    client = new MongoClient(config.get('mongoUri'))
+    await client.connect()
+  }
 
-  const db: Db = client.db('ticket-queue')
-  collection = db.collection('tickets')
+  if (!collection) {
+    const db: Db = client.db('ticket-queue')
+    collection = db.collection('tickets')
+  }
 }
 
 export { client, collection, connect }

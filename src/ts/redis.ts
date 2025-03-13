@@ -8,7 +8,9 @@ const options: RedisClientOptions = {
 }
 
 async function connect (): Promise<void> {
-  client = await createClient(options).connect()
+  if (!client) {
+    client = await createClient(options).connect()
+  }
 }
 
 export { client, connect }
