@@ -1,9 +1,10 @@
 import { expect, test, describe, beforeEach, afterEach, vi } from 'vitest'
 import { Server, ServerInjectOptions, ServerInjectResponse } from '@hapi/hapi'
-import { createServer } from '../src/dist/server.js'
 
 vi.mock('../src/dist/mongo.js')
 vi.mock('../src/dist/redis.js')
+
+const { createServer } = await import('../src/dist/server.js')
 
 describe('home test', () => {
   let server: Server
